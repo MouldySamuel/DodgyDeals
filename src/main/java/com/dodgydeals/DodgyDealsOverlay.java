@@ -10,6 +10,8 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.api.Perspective;
 import net.runelite.api.NPCComposition;
+import net.runelite.client.ui.overlay.components.TitleComponent;
+import net.runelite.client.ui.overlay.components.PanelComponent;
 
 import javax.inject.Inject;
 import java.awt.*;
@@ -22,6 +24,7 @@ public class DodgyDealsOverlay extends Overlay
 
     private final Client client;
     private final DodgyDealsConfig config;
+    private final PanelComponent panelComponent = new PanelComponent();
 
     private Set<NPC> pickpocketableNPCs = new HashSet<>();
 
@@ -196,43 +199,36 @@ public class DodgyDealsOverlay extends Overlay
 
     private void renderTooltip(Graphics2D graphics)
     {
-        // Enable anti-aliasing for better text rendering
-        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        if (!config.showTooltip()) {
+            return; // Do nothing if the tooltip is disabled
+        }
 
-        // Define tooltip text
-        String tooltipText = "Pickpocketable NPCs: " + pickpocketableNPCs.size();
+        // Use configurable tooltip position
+        int tooltipX = config.tooltipX();
+        int tooltipY = config.tooltipY();
 
-        // Set font for the tooltip
-        graphics.setFont(new Font("Arial", Font.PLAIN, 12));
+        // Clear the panel component before each render
+        panelComponent.getChildren().clear();
 
-        // Measure the size of the text to properly position and size the box
-        FontMetrics fontMetrics = graphics.getFontMetrics();
-        int textWidth = fontMetrics.stringWidth(tooltipText);
-        int textHeight = fontMetrics.getHeight();
+        // Add the text for the panel component
+        panelComponent.getChildren().add(
+                TitleComponent.builder()
+                        .text("Pickpocketable NPCs: " + pickpocketableNPCs.size())
+                        .color(Color.WHITE)
+                        .build()
+        );
 
-        // Define the box dimensions (with padding)
-        int padding = 6; // Padding around the text inside the box
-        int boxWidth = textWidth + 2 * padding;
-        int boxHeight = textHeight + 2 * padding;
+        // Default to centered at the top
+        if (tooltipX == 0)
+        {
+            tooltipX = client.getCanvasWidth() / 2 - panelComponent.getPreferredSize().width / 2;
+        }
 
-        // Get the screen width (this will allow us to center the tooltip)
-        int screenWidth = client.getCanvasWidth();
+        // Set the panel's background color and position
+        panelComponent.setPreferredLocation(new Point(tooltipX, tooltipY));
+        panelComponent.setBackgroundColor(new Color(0, 0, 0, 128)); // Semi-transparent black
 
-        // Calculate the x position to center the tooltip (horizontal centering)
-        int xPosition = (screenWidth - boxWidth) / 2;
-
-        // Set the semi-transparent color for the box (50% opacity)
-        Color boxColor = new Color(0, 0, 0, 128); // Semi-transparent black (50% opacity)
-        graphics.setColor(boxColor);
-
-        // Draw the box behind the text
-        graphics.fillRoundRect(xPosition, 10 - padding, boxWidth, boxHeight, 8, 8);
-
-        // Set the color for the text (White)
-        graphics.setColor(Color.WHITE);
-
-        // Draw the tooltip text centered inside the box
-        graphics.drawString(tooltipText, xPosition + padding, 10 + fontMetrics.getAscent());
+        // Render the panel component
+        panelComponent.render(graphics);
     }
 }
