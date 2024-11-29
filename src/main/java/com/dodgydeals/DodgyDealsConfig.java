@@ -59,7 +59,7 @@ public interface DodgyDealsConfig extends Config
             position = 5
     )
     default int tileOpacity() {
-        return 128; // Default is 50% opacity
+        return 0; // Default is 50% opacity
     }
 
     @ConfigItem(
@@ -79,7 +79,7 @@ public interface DodgyDealsConfig extends Config
             position = 7
     )
     default int tileBorderWidth() {
-        return 2; // Default is 2 pixels
+        return 1; // Default is 2 pixels
     }
 
     @ConfigItem(
@@ -100,5 +100,15 @@ public interface DodgyDealsConfig extends Config
     )
     default int npcHighlightOpacity() {
         return 128; // Default is 50% opacity
+    }
+
+    @ConfigItem(
+            keyName = "pluginHideTime",
+            name = "Hide Overlay After",
+            description = "How many seconds after thieving to wait before hiding the overlay (3+)",
+            position = 10
+    )
+    default int pluginHideTime() {
+        return 3; // Defaults to 3 seconds so that it doesn't disable between animations
     }
 }
