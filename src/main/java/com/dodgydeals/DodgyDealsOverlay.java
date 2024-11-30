@@ -18,10 +18,12 @@ import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 
+
 public class DodgyDealsOverlay extends Overlay
 {
     private static final int RADIUS = 5; // Half of 11 (center included)
 
+    private final DodgyDealsPlugin plugin;
     private final Client client;
     private final DodgyDealsConfig config;
     private final PanelComponent panelComponent = new PanelComponent();
@@ -29,10 +31,14 @@ public class DodgyDealsOverlay extends Overlay
     private Set<NPC> pickpocketableNPCs = new HashSet<>();
 
     @Inject
-    public DodgyDealsOverlay(Client client, DodgyDealsConfig config)
+    public DodgyDealsOverlay(Client client, DodgyDealsConfig config, DodgyDealsPlugin plugin)
     {
+
         this.client = client;
         this.config = config;
+        this.plugin = plugin;
+
+
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.ABOVE_SCENE);
     }
@@ -41,7 +47,7 @@ public class DodgyDealsOverlay extends Overlay
     public Dimension render(Graphics2D graphics)
     {
         Player player = client.getLocalPlayer();
-        if (player == null)
+        if (player == null || !plugin.shouldShowOverlay()) // Check plugin's shouldShowOverlay method
         {
             return null;
         }
@@ -78,6 +84,7 @@ public class DodgyDealsOverlay extends Overlay
 
         return null;
     }
+
 
     private void renderTile(Graphics2D graphics, WorldPoint point)
     {
